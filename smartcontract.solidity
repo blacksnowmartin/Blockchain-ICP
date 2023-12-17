@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract DrugSupplyChain {
+    address public owner;
+    
+    enum DrugStatus { Created, Shipped, Delivered }
+
+    struct Drug {
+        uint256 id;
+        string name;
+        uint256 batchNumber;
+        DrugStatus status;
+        address manufacturer;
+        address distributor;
+        address healthcareProvider;
+    }
+
+    mapping(uint256 => Drug) public drugs;
+    uint256 public drugCount;
+
+    event DrugCreated(uint256 id, string name, uint256 batchNumber, DrugStatus status);
+    event DrugShipped(uint256 id, address distributor, DrugStatus status);
+    event DrugDelivered(uint256 id, address healthcareProvider, DrugStatus status);
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the contract owner can call this function");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function createDrug(string memory _name, uint256 _batchNumber) external onlyOwner {
+        drugCount++;
+        drugs[drugCount] = Drug(drugCount, _name, _batchNumber, DrugStatus.Created, owner, address(0), address(0));
+        emit DrugCreated(drugCount, _name, _batchNumber, DrugStatus.Created);
+    }
+
+    function shipDrug(uint256 _id, address _distributor) external onlyOwner {
+        Drug storage drug = drugs[_id];
+        require(drug.status == DrugStatus.Created, "Drug must be in 'Created' status to be shipped");
+        drug.distributor = _distributor;
+        drug.status = DrugStatus.Shipped;
+        emit DrugShipped(_id, _distributor, DrugStatus.Shipped);
+    }
+
+    function deliverDrug(uint256 _id, address _healthcareProvider) external onlyOwner {
+        Drug storage drug = drugs[_id];
+        require(drug.status == DrugStatus.Shipped, "Drug must be in 'Shipped' status to be delivered");
+        drug.healthcareProvider = _healthcareProvider;
+        drug.status = DrugStatus.Delivered;
+        emit DrugDelivered(_id, _healthcareProvider, DrugStatus.Delivered);
+    }
+}
