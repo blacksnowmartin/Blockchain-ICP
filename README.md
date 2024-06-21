@@ -1,3 +1,3 @@
 # Blockchain-ICP
-Blockchain for Transparent HIV/AIDS Drug Supply Chain
+Blockchain for Transparent ARVs Drug Supply Chain
 ### Blacksnow Martin 2023©
